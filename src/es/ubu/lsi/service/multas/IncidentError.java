@@ -37,3 +37,4 @@ public enum IncidentError {
 		return text;
 	}
 }
+
