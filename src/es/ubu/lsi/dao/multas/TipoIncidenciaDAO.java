@@ -7,6 +7,10 @@ import es.ubu.lsi.model.multas.TipoIncidencia;
 
 public class TipoIncidenciaDAO extends JpaDAO<TipoIncidencia, Long> {
 
+    public TipoIncidenciaDAO() {
+        super();
+    }
+
     @Override
     public List<TipoIncidencia> findAll() {
         return getEntityManager().createQuery("SELECT t FROM TipoIncidencia t", TipoIncidencia.class).getResultList();

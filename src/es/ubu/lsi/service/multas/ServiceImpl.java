@@ -11,6 +11,7 @@ import es.ubu.lsi.dao.multas.*;
 
 public class ServiceImpl extends PersistenceService implements Service {
     
+    private EntityManager entityManager;
     private VehiculoDAO vehiculoDAO;
     private ConductorDAO conductorDAO;
     private TipoIncidenciaDAO tipoIncidenciaDAO;
@@ -18,17 +19,33 @@ public class ServiceImpl extends PersistenceService implements Service {
     private HistoricoIncidenciaDAO historicoIncidenciaDAO;
     
     public ServiceImpl() {
-        EntityManager em = this.getEntityManager();
+        this.entityManager = createSession();
         vehiculoDAO = new VehiculoDAO();
-        vehiculoDAO.setEntityManager(em);
+        vehiculoDAO.setEntityManager(entityManager);
         conductorDAO = new ConductorDAO();
-        conductorDAO.setEntityManager(em);
+        conductorDAO.setEntityManager(entityManager);
         tipoIncidenciaDAO = new TipoIncidenciaDAO();
-        tipoIncidenciaDAO.setEntityManager(em);
+        tipoIncidenciaDAO.setEntityManager(entityManager);
         incidenciaDAO = new IncidenciaDAO();
-        incidenciaDAO.setEntityManager(em);
+        incidenciaDAO.setEntityManager(entityManager);
         historicoIncidenciaDAO = new HistoricoIncidenciaDAO();
-        historicoIncidenciaDAO.setEntityManager(em);
+        historicoIncidenciaDAO.setEntityManager(entityManager);
+    }
+
+    protected EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    protected void begin() {
+        beginTransaction(entityManager);
+    }
+
+    protected void commit() {
+        commitTransaction(entityManager);
+    }
+
+    protected void rollback() {
+        rollbackTransaction(entityManager);
     }
 
     @Override

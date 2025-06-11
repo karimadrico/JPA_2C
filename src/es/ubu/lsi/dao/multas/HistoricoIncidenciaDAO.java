@@ -8,6 +8,10 @@ import es.ubu.lsi.model.multas.IncidenciaPK;
 
 public class HistoricoIncidenciaDAO extends JpaDAO<HistoricoIncidencia, IncidenciaPK> {
 
+    public HistoricoIncidenciaDAO() {
+        super();
+    }
+
     @Override
     public List<HistoricoIncidencia> findAll() {
         return getEntityManager().createQuery("SELECT h FROM HistoricoIncidencia h", HistoricoIncidencia.class).getResultList();

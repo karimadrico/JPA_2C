@@ -8,6 +8,10 @@ import es.ubu.lsi.model.multas.Vehiculo;
 
 public class VehiculoDAO extends JpaDAO<Vehiculo, String> {
 
+    public VehiculoDAO() {
+        super();
+    }
+
     @Override
     public List<Vehiculo> findAll() {
         return getEntityManager().createQuery("SELECT v FROM Vehiculo v", Vehiculo.class).getResultList();

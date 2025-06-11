@@ -15,6 +15,7 @@
 		<class>es.ubu.lsi.model.multas.TipoIncidencia</class>
 		<class>es.ubu.lsi.model.multas.Incidencia</class>
 		<class>es.ubu.lsi.model.multas.HistoricoIncidencia</class>
+		<class>es.ubu.lsi.dao</class>
 
 		<properties>
 			 

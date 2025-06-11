@@ -7,6 +7,10 @@ import es.ubu.lsi.model.multas.Conductor;
 
 public class ConductorDAO extends JpaDAO<Conductor, String> {
 
+    public ConductorDAO() {
+        super();
+    }
+
     @Override
     public List<Conductor> findAll() {
         return getEntityManager().createQuery("SELECT c FROM Conductor c", Conductor.class).getResultList();
