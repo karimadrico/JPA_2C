@@ -16,9 +16,11 @@
 		<class>es.ubu.lsi.model.multas.Incidencia</class>
 		<class>es.ubu.lsi.model.multas.HistoricoIncidencia</class>
 		<class>es.ubu.lsi.dao</class>
+		<class>es.ubu.lsi.model.multas.IncidenciaPK</class>
+		<class>es.ubu.lsi.model.multas.DireccionPostal</class>
 
 		<properties>
-			 
+			<!-- Configuración de Hibernate -->
 			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
 			<property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver" />
 			<property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:XE" />
@@ -30,28 +32,18 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.generate_statistics" value="false" />
 			<property name="hibernate.use_sql_comments" value="true" />
-			
-
-			<!-- Solution 1: internal Hibernate pool connection not for production -->
 			<property name="hibernate.connection.pool_size" value="5" />
 			
-				
-			<!-- Configuration with EclipseLink, other persistence provider -->
-			<!-- 
-			<property name="javax.persistence.jdbc.url"
-				value="jdbc:oracle:thin:@localhost:1521:XE" />
-			<property name="javax.persistence.jdbc.user" value="HR" />
+			<!-- Configuración JPA estándar -->
+			<property name="javax.persistence.jdbc.driver" value="oracle.jdbc.driver.OracleDriver" />
+			<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+			<property name="javax.persistence.jdbc.user" value="Hr" />
 			<property name="javax.persistence.jdbc.password" value="hr" />
-			<property name="javax.persistence.jdbc.driver"
-				value="oracle.jdbc.OracleDriver" />				
-			<property name="eclipselink.logging.level" value="FINE" />
-			<property name="eclipselink.logging.parameters" value="true" />
-			<property name="eclipselink.logging.level.cache"
-				value="FINEST" /> 
-			<property name="eclipselink.allow-zero-id" value="true"/>
-			<property name="eclipselink.id-validation" value="NULL"/> 
-			-->
+			
+			<!-- Configuración de validación -->
+			<property name="javax.persistence.validation.mode" value="auto" />
 		</properties>
 	</persistence-unit>
 	
 </persistence>
+

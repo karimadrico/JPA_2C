@@ -1,9 +1,13 @@
 package es.ubu.lsi.model.multas;
 
+import java.io.Serializable;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class DireccionPostal {
+public class DireccionPostal implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
     private String direccion;
     private String codigoPostal;
     private String ciudad;

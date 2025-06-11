@@ -33,11 +33,18 @@ public abstract class JpaDAO<E,K> implements DAO<E,K> {
 	protected EntityManager entityManager;
 
 	/**
-	 * Constructor.
+	 * Constructor sin parámetros.
 	 */
-	public JpaDAO(EntityManager em) {
+	public JpaDAO() {
 		ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericSuperclass();
 		this.entityClass = (Class<?>) genericSuperclass.getActualTypeArguments()[ENTITY_FORMAL_PAR];
+	}
+
+	/**
+	 * Constructor con EntityManager.
+	 */
+	public JpaDAO(EntityManager em) {
+		this();
 		this.setEntityManager(em);
 	}
 	
@@ -46,7 +53,7 @@ public abstract class JpaDAO<E,K> implements DAO<E,K> {
 	 * 
 	 * @param em entity manager.
 	 */
-	private void setEntityManager(EntityManager em) {
+	public void setEntityManager(EntityManager em) {
 		this.entityManager = em;
 	}
 	
@@ -88,4 +95,3 @@ public abstract class JpaDAO<E,K> implements DAO<E,K> {
 
 	public abstract List<E> findAll();
 }
-
