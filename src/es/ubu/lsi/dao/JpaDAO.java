@@ -1,6 +1,7 @@
 package es.ubu.lsi.dao;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -80,4 +81,11 @@ public abstract class JpaDAO<E,K> implements DAO<E,K> {
 	 */
 	@SuppressWarnings("unchecked")
 	public E findById(K id) { return (E) entityManager.find(entityClass, id); }
+
+	public E merge(E entity) {
+		return entityManager.merge(entity);
+	}
+
+	public abstract List<E> findAll();
 }
+
