@@ -54,3 +54,4 @@ public interface Service {
 	public List<Vehiculo> consultarVehiculos() throws PersistenceException;
 
 }
+
