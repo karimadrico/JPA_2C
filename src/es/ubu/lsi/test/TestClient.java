@@ -342,9 +342,15 @@ try {
 			}
 			con.commit();
 		} catch (Exception ex) {
-			logger.error("ERROR grave en test. " + ex.getLocalizedMessage());
-			con.rollback();
-			throw ex;
+		    logger.error("ERROR grave en test. " + ex.getLocalizedMessage());
+		    if (con != null) {
+		        try {
+		            con.rollback();
+		        } catch (SQLException e) {
+		            logger.error("Error al hacer rollback", e);
+		        }
+		    }
+		    throw ex;
 		} finally {
 			cerrarRecursos(con, st, rs);
 		}

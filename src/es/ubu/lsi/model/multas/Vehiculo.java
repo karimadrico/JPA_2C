@@ -2,7 +2,15 @@ package es.ubu.lsi.model.multas;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "VEHICULO")
@@ -15,6 +23,11 @@ public class Vehiculo {
     private String nombre;
     
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "direccion", column = @Column(name = "DIRECCION")),
+        @AttributeOverride(name = "codigoPostal", column = @Column(name = "CP")),
+        @AttributeOverride(name = "ciudad", column = @Column(name = "CIUDAD"))
+    })
     private DireccionPostal direccionPostal;
     
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)

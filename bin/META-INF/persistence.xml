@@ -15,35 +15,33 @@
 		<class>es.ubu.lsi.model.multas.TipoIncidencia</class>
 		<class>es.ubu.lsi.model.multas.Incidencia</class>
 		<class>es.ubu.lsi.model.multas.HistoricoIncidencia</class>
-		<class>es.ubu.lsi.dao</class>
 		<class>es.ubu.lsi.model.multas.IncidenciaPK</class>
 		<class>es.ubu.lsi.model.multas.DireccionPostal</class>
 
 		<properties>
-			<!-- Configuración de Hibernate -->
-			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
-			<property name="hibernate.connection.driver_class" value="oracle.jdbc.driver.OracleDriver" />
-			<property name="hibernate.connection.url" value="jdbc:oracle:thin:@localhost:1521:XE" />
-			<property name="hibernate.default_schema" value="HR" />
-			<property name="hibernate.connection.username" value="HR" />
-			<property name="hibernate.connection.password" value="hr" />
-			<property name="hibernate.connection.autocommit" value="false" />
-			<property name="hibernate.show_sql" value="true" />
-			<property name="hibernate.format_sql" value="true" />
-			<property name="hibernate.generate_statistics" value="false" />
-			<property name="hibernate.use_sql_comments" value="true" />
-			<property name="hibernate.connection.pool_size" value="5" />
-			
-			<!-- Configuración JPA estándar -->
-			<property name="javax.persistence.jdbc.driver" value="oracle.jdbc.driver.OracleDriver" />
-			<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe" />
-			<property name="javax.persistence.jdbc.user" value="Hr" />
+			<!-- Configuración de conexión -->
+			<property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver" />
+			<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:XE" />
+			<property name="javax.persistence.jdbc.user" value="HR" />
 			<property name="javax.persistence.jdbc.password" value="hr" />
 			
+			<!-- Configuración de Hibernate -->
+			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.use_sql_comments" value="true" />
+			
+			<!-- Configuración específica de Oracle -->
+			<property name="hibernate.default_schema" value="HR" />
+			<property name="hibernate.temp.use_jdbc_metadata_defaults" value="false" />
+			<property name="hibernate.globally_quoted_identifiers" value="true" />
+			
 			<!-- Configuración de validación -->
-			<property name="javax.persistence.validation.mode" value="auto" />
+			<property name="javax.persistence.validation.mode" value="none" />
+			<property name="hibernate.hbm2ddl.auto" value="validate" />
 		</properties>
 	</persistence-unit>
 	
 </persistence>
+
 

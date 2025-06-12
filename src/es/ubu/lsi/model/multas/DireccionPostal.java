@@ -1,6 +1,7 @@
 package es.ubu.lsi.model.multas;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
@@ -8,8 +9,13 @@ public class DireccionPostal implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
+    @Column(name = "DIRECCION")
     private String direccion;
+    
+    @Column(name = "CP")
     private String codigoPostal;
+    
+    @Column(name = "CIUDAD")
     private String ciudad;
 
     public DireccionPostal() {

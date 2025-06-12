@@ -8,6 +8,8 @@ public class Incidencia {
     @EmbeddedId
     private IncidenciaPK id;
     
+    @Lob
+    @Column(name = "ANOTACION")
     private String anotacion;
     
     @MapsId("nif")
