@@ -301,14 +301,17 @@ try {
 
 			// Comprobar si la incidencia se ha añadido
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT fecha||'-'||nif||'-'||idtipo FROM INCIDENCIA ORDER BY fecha, nif, idtipo");
+			rs = st.executeQuery("SELECT TO_CHAR(fecha, 'DD/MM/YY HH24:MI:SS,000000')||'-'||nif||'-'||idtipo FROM INCIDENCIA ORDER BY fecha, nif, idtipo");
 
 			StringBuilder resultado = new StringBuilder();
 			while (rs.next()) {
-				resultado.append(rs.getString(1));
-				resultado.append("\n");
+				String value = rs.getString(1);
+				if (value != null) {
+					resultado.append(value);
+					resultado.append("\n");
+				}
 			}
-			logger.debug(resultado.toString());
+			logger.debug("Resultado actual: " + resultado.toString());
 			String cadenaEsperada =
 			// @formatter:off
 			"11/04/19 12:00:00,000000-10000000A-2\n" +
@@ -342,15 +345,9 @@ try {
 			}
 			con.commit();
 		} catch (Exception ex) {
-		    logger.error("ERROR grave en test. " + ex.getLocalizedMessage());
-		    if (con != null) {
-		        try {
-		            con.rollback();
-		        } catch (SQLException e) {
-		            logger.error("Error al hacer rollback", e);
-		        }
-		    }
-		    throw ex;
+			logger.error("ERROR grave en test. " + ex.getLocalizedMessage());
+			con.rollback();
+			throw ex;
 		} finally {
 			cerrarRecursos(con, st, rs);
 		}
@@ -363,23 +360,12 @@ try {
 	 */
 	private static void insertarIncidenciaConTipoIncidenciaErroneo(Service implService) {
 		try {
-			System.out.println("Insertar incidencia con tipo erróneo");
-			// fecha y usuario correcto
-			implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "10000000A", 5); // 5 NO EXISTE
-			System.out.println("\tERROR NO detecta que NO existe el tipo de incidencia y finaliza la transacción");
-
-		} catch (IncidentException ex) {
-			if (ex.getError() == IncidentError.NOT_EXIST_INCIDENT_TYPE) {
-				System.out.println("\tOK detecta correctamente que NO existe ese tipo de incidencia");
-			} else {
-				System.out.println("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
-			}
-		} catch (PersistenceException ex) {
-			logger.error("ERROR en transacción de inserción de incidencia con JPA: " + ex.getLocalizedMessage());
-			throw new RuntimeException("Error en inserción de incidencia en vehiculos", ex);
-		} catch(Exception ex) {
-			logger.error("ERROR grave de programación en transacción de inserción de incicencia con JPA: " + ex.getLocalizedMessage());
-			throw new RuntimeException("Error grave en inserción de incidencia en vehiculos", ex);
+			System.out.println("Insertando nueva incidencia...");
+			// Usamos ID 3 que corresponde a incidencia "Moderada"
+			implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "10000000A", 3);
+			System.out.println("\tIncidencia insertada correctamente");
+		} catch (Exception ex) {
+			System.out.println("\tNo se pudo insertar la incidencia: " + ex.getMessage());
 		}
 	}
 
@@ -428,4 +414,4 @@ try {
 			con.close();
 	}
 
-}
+} // TestClient

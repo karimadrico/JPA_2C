@@ -34,8 +34,9 @@
 			<!-- Configuración específica de Oracle -->
 			<property name="hibernate.default_schema" value="HR" />
 			<property name="hibernate.temp.use_jdbc_metadata_defaults" value="false" />
-			<property name="hibernate.globally_quoted_identifiers" value="true" />
-			
+			<property name="hibernate.globally_quoted_identifiers" value="false" />
+			<property name="hibernate.auto_quote_keyword" value="false" />
+		
 			<!-- Configuración de validación -->
 			<property name="javax.persistence.validation.mode" value="none" />
 			<property name="hibernate.hbm2ddl.auto" value="validate" />

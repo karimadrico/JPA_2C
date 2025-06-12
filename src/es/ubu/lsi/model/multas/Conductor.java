@@ -40,7 +40,7 @@ public class Conductor {
     private DireccionPostal direccionPostal;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IDAUTO", nullable = false)
+    @JoinColumn(name = "IDAUTO")
     private Vehiculo vehiculo;
     
     @OneToMany(mappedBy = "conductor", cascade = CascadeType.ALL, orphanRemoval = true)
