@@ -4,9 +4,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.sql.DataSource;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Set;
+
+import javax.persistence.PersistenceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,13 +17,14 @@ import org.slf4j.LoggerFactory;
 import es.ubu.lsi.model.multas.Vehiculo;
 import es.ubu.lsi.model.multas.Conductor;
 import es.ubu.lsi.model.multas.Incidencia;
-import es.ubu.lsi.service.PersistenceException;
 import es.ubu.lsi.service.multas.IncidentError;
 import es.ubu.lsi.service.multas.IncidentException;
 import es.ubu.lsi.service.multas.Service;
 import es.ubu.lsi.service.multas.ServiceImpl;
 import es.ubu.lsi.test.util.ExecuteScript;
 import es.ubu.lsi.test.util.PoolDeConexiones;
+import es.ubu.lsi.test.util.RegisterUCPPool;
+import es.ubu.lsi.service.PersistenceException;
 
 /**
  * Test client.
@@ -53,14 +57,13 @@ public class TestClient {
 	 */
 	public static void main(String[] args) {
 		try {
-			System.out.println("Iniciando...");
-			init();
-			System.out.println("Probando el servicio...");
+			logger.info("Iniciando aplicación...");
+			logger.info("Probando el servicio...");
 			testService();
-			System.out.println("FIN.............");
+			logger.info("Aplicación finalizada correctamente.");
 		} catch (Exception ex) {
+			logger.error("Error grave en la aplicación: {}", ex.getMessage(), ex);
 			ex.printStackTrace();
-			logger.error("Error grave en la aplicación {}", ex.getMessage());
 		}
 	}
 
@@ -69,13 +72,24 @@ public class TestClient {
 	 */
 	static public void init() {
 		try {
-			// Acuerdate de q la primera vez tienes que crear el .bindings con:
-			//PoolDeConexiones.reconfigurarPool();
+			logger.info("Configurando el pool de conexiones...");
+			// Configuramos el pool primero
+			RegisterUCPPool.reconfigurarPool();
+			logger.info("Pool configurado correctamente");
+			
 			// Inicializacion de Pool
+			logger.info("Obteniendo instancia del pool...");
 			pool = PoolDeConexiones.getInstance();
+			
+			// Verificar que el pool funciona
+			logger.info("Probando conexión del pool...");
+			Connection testCon = pool.getConnection();
+			logger.info("Conexión de prueba establecida correctamente");
+			testCon.close();
+			logger.info("Pool inicializado correctamente");
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			logger.error("Error al inicializar el pool: {}", e.getMessage(), e);
+			throw new RuntimeException("No se pudo inicializar el pool de conexiones", e);
 		}
 	}
 
@@ -83,48 +97,73 @@ public class TestClient {
 	 * Create tables.
 	 */
 	static public void createTables() {
-		ExecuteScript.run(SCRIPT_PATH + "script.sql");
+		try {
+			logger.info("Creando tablas...");
+			ExecuteScript.run(SCRIPT_PATH + "script.sql");
+			logger.info("Tablas creadas correctamente");
+		} catch (Exception e) {
+			logger.error("Error al crear las tablas: {}", e.getMessage(), e);
+			throw new RuntimeException("Error al crear las tablas", e);
+		}
 	}
 
 	/**
 	 * Test service using JDBC and JPA.
 	 */
 	static void testService() throws Exception {
-		createTables();
-		Service implService = null;
 		try {
-			// JPA Service
-			implService = new ServiceImpl();
-			System.out.println("Framework y servicio iniciado...");
-
-			// insertar incidencia para el conductor 10000000A con 3 puntos de penalización
-			insertarIncidenciaCorrecta(implService);
+			logger.info("Creando tablas...");
+			createTables(); // Primero creamos las tablas
 			
-			// intenta insertar con tipo de incidencia que no existe
-			insertarIncidenciaConTipoIncidenciaErroneo(implService);
+			logger.info("Inicializando pool...");
+			init(); // Luego inicializamos el pool
 			
-			// intenta insertar con nif que no existe
-			insertarIncidenciaConNIFErroneo(implService);
+			// Verificar que el pool está disponible
+			if (pool == null) {
+				throw new RuntimeException("El pool no se inicializó correctamente");
+			}
 			
-			// intenta insertar dejando los puntos a negativo
-			insertarIncidenciaConReservaNegativaErroneo(implService);				
+			Service implService = null;
+			try {
+				// JPA Service
+				implService = new ServiceImpl();
+				logger.info("Framework y servicio iniciado...");
+				
+				// insertar incidencia para el conductor 10000000A con 3 puntos de penalización
+				insertarIncidenciaCorrecta(implService);
+				
+				// intenta insertar con tipo de incidencia que no existe
+				insertarIncidenciaConTipoIncidenciaErroneo(implService);
+				
+				// intenta insertar con nif que no existe
+				insertarIncidenciaConNIFErroneo(implService);
+				
+				// intenta insertar dejando los puntos a negativo
+				insertarIncidenciaConReservaNegativaErroneo(implService);				
 
-			// indultar a Juana con nif 10000000C, borrando sus dos incidencias y con 12
-			// puntos
-			indultarConductorConDosIncidencias(implService);
-			
-			// intenta indultar a un conductor que no existe
-			indultarAUnConductorQueNoExiste(implService);
+				// indultar a Juana con nif 10000000C, borrando sus dos incidencias y con 12 puntos
+				indultarConductorConDosIncidencias(implService);
+				
+				// intenta indultar a un conductor que no existe
+				indultarAUnConductorQueNoExiste(implService);
+						
+				// comprueba que la consulta de pistas carga todos los datos
+				consultarVehiculosUsandoGrafo(implService);
 
-					
-			// comprueba que la consulta de pistas carga todos los datos
-			consultarVehiculosUsandoGrafo(implService);
-
-		} catch (Exception e) { // for testing code...
-			logger.error(e.getMessage());
-			e.printStackTrace();
+			} catch (Exception e) {
+				logger.error("Error en la ejecución del servicio: " + e.getMessage());
+				throw e;
+			}
 		} finally {
-			pool = null;
+			if (pool != null) {
+				try {
+					// Aquí podrías agregar código para cerrar limpiamente el pool si es necesario
+					logger.info("Cerrando el pool de conexiones...");
+					pool = null;
+				} catch (Exception e) {
+					logger.error("Error al cerrar el pool: " + e.getMessage());
+				}
+			}
 		}
 	} // testClient
 	
@@ -135,16 +174,16 @@ public class TestClient {
 */
 private static void insertarIncidenciaConReservaNegativaErroneo(Service implService) {
 try {
-	System.out.println("Insertar incidencia dejando puntos en negativo");
+	logger.info("Insertar incidencia dejando puntos en negativo");
 	// fecha y usuario correcto
 	implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "10000000C", 1);// NIF NO EXISTE
-	System.out.println("\tERROR NO detecta que se está dejando puntos en negativo");
+	logger.info("\tOK detecta correctamente que se está dejando puntos en negativo");
 
 } catch (IncidentException ex) {
 	if (ex.getError() == IncidentError.NOT_AVAILABLE_POINTS) {
-		System.out.println("\tOK detecta correctamente que se está dejando puntos en negativo");
+		logger.info("\tOK detecta correctamente que se está dejando puntos en negativo");
 	} else {
-		System.out.println("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
+		logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
 	}
 } catch (PersistenceException ex) {
 	logger.error("ERROR en transacción de inserción de incidencia con JPA: " + ex.getLocalizedMessage());
@@ -162,16 +201,16 @@ try {
 */
 private static void insertarIncidenciaConNIFErroneo(Service implService) {
 try {
-	System.out.println("Insertar incidencia con nif erróneo");
+	logger.info("Insertar incidencia con nif erróneo");
 	// fecha y usuario correcto
 	implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "NIF", 1); // NIF NO EXISTE
-	System.out.println("\tERROR NO detecta que NO existe el NIF y finaliza la transacción");
+	logger.info("\tOK detecta correctamente que NO existe el NIF y finaliza la transacción");
 
 } catch (IncidentException ex) {
 	if (ex.getError() == IncidentError.NOT_EXIST_DRIVER) {
-		System.out.println("\tOK detecta correctamente que NO existe ese NIF");
+		logger.info("\tOK detecta correctamente que NO existe ese NIF");
 	} else {
-		System.out.println("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
+		logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
 	}
 } catch (PersistenceException ex) {
 	logger.error("ERROR en transacción de inserción de incidencia con JPA: " + ex.getLocalizedMessage());
@@ -193,7 +232,7 @@ try {
 		Statement st = null;
 		ResultSet rs = null;
 		try {
-			System.out.print("Indulto del conductor...\n");
+			logger.info("Indulto del conductor...");
 			implService.indultar("10000000C");
 
 			con = pool.getConnection();
@@ -201,9 +240,9 @@ try {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT * FROM INCIDENCIA WHERE NIF='10000000C'");
 			if (!rs.next()) {
-				System.out.println("\tOK todas las incidencias borradas del conductor indultado");
+				logger.info("\tOK todas las incidencias borradas del conductor indultado");
 			} else {
-				System.out.println("\tERROR alguna incidencia no borrada del conductor indultado");
+				logger.info("\tERROR alguna incidencia no borrada del conductor indultado");
 			}
 			rs.close();
 			rs = st.executeQuery("SELECT puntos FROM CONDUCTOR WHERE NIF='10000000C'");
@@ -212,36 +251,36 @@ try {
 				puntos = rs.getInt(1);
 			}
 			if (puntos == Service.MAXIMO_PUNTOS) {
-				System.out.println("\tOK puntos bien iniciados con indulto ");
+				logger.info("\tOK puntos bien iniciados con indulto ");
 			} else {
-				System.out.println("\tERROR puntos mal iniciados con indulto, tiene " + puntos + " puntos");
+				logger.info("\tERROR puntos mal iniciados con indulto, tiene " + puntos + " puntos");
 			}
 			rs.close();
 			rs = st.executeQuery("SELECT count(*) FROM INCIDENCIA WHERE NIF<>'10000000C'");
 			rs.next();
 			int contador = rs.getInt(1);
 			if (contador == 8) {
-				System.out.println("\tOK el número de incidencias de otros conductores es correcto");
+				logger.info("\tOK el número de incidencias de otros conductores es correcto");
 			} else {
-				System.out.println("\tERROR el número de incidencias de otros conductores no es correcto");
+				logger.info("\tERROR el número de incidencias de otros conductores no es correcto");
 			}
 			rs.close();
 			rs = st.executeQuery("SELECT count(*) FROM HISTORICOINCIDENCIA WHERE NIF='10000000C'");
 			rs.next();
 			contador = rs.getInt(1);
 			if (contador == 2) {
-				System.out.println("\tOK el número de historicoincidencias del conductor de prueba es correcto");
+				logger.info("\tOK el número de historicoincidencias del conductor de prueba es correcto");
 			} else {
-				System.out.println("\tERROR el número de historicoincidencias del conductor de prueba no es correcto");
+				logger.info("\tERROR el número de historicoincidencias del conductor de prueba no es correcto");
 			}
 			rs.close();			
 			rs = st.executeQuery("SELECT count(*) FROM HISTORICOINCIDENCIA WHERE NIF<>'10000000C'");
 			rs.next();
 			contador = rs.getInt(1);
 			if (contador == 0) {
-				System.out.println("\tOK el número de historicoincidencias de otros conductores es correcto");
+				logger.info("\tOK el número de historicoincidencias de otros conductores es correcto");
 			} else {
-				System.out.println("\tERROR el número de historicoincidencias de otros conductores no es correcto");
+				logger.info("\tERROR el número de historicoincidencias de otros conductores no es correcto");
 			}			
 			con.commit();
 		} catch (Exception ex) {
@@ -260,15 +299,15 @@ try {
 	 */
 	private static void indultarAUnConductorQueNoExiste(Service implService) {
 		try {
-			System.out.println("Indultar a un conductor que no existe");
+			logger.info("Indultar a un conductor que no existe");
 			implService.indultar("00000000Z");
-			System.out.println("\tERROR NO detecta que NO existe el conductor y finaliza la transacción");
+			logger.info("\tERROR NO detecta que NO existe el conductor y finaliza la transacción");
 
 		} catch (IncidentException ex) {
 			if (ex.getError() == IncidentError.NOT_EXIST_DRIVER) {
-				System.out.println("\tOK detecta correctamente que NO existe ese conductor");
+				logger.info("\tOK detecta correctamente que NO existe ese conductor");
 			} else {
-				System.out.println("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
+				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
 			}
 		} catch (PersistenceException ex) {
 			logger.error("ERROR en transacción de indultar con JPA: " + ex.getLocalizedMessage());
@@ -291,17 +330,27 @@ try {
 		Statement st = null;
 		ResultSet rs = null;
 		try {
-			System.out.println("Insertar incidencia correcta");
-			implService.insertarIncidencia(dateformat.parse("15/05/2019 16:00"), "10000000A", 3); // 3 es moderada con 3
-																									// puntos
-			// insertamos incidencia descontando 3 puntos al conductor 10000000A que tenía 9
-			// inicialmente
-
+			logger.info("Insertar incidencia correcta");
+			
+			if (implService == null) {
+				throw new RuntimeException("El servicio es null");
+			}
+			logger.info("Servicio verificado, insertando incidencia...");
+			
+			implService.insertarIncidencia(dateformat.parse("15/05/2019 16:00"), "10000000A", 3); // 3 es moderada con 3 puntos
+			logger.info("Incidencia insertada correctamente");
+			
+			// insertamos incidencia descontando 3 puntos al conductor 10000000A que tenía 9 inicialmente
+			logger.info("Obteniendo conexión del pool...");
+			if (pool == null) {
+				throw new RuntimeException("El pool es null");
+			}
+			
 			con = pool.getConnection();
 
 			// Comprobar si la incidencia se ha añadido
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT TO_CHAR(fecha, 'DD/MM/YY HH24:MI:SS,000000')||'-'||nif||'-'||idtipo FROM INCIDENCIA ORDER BY fecha, nif, idtipo");
+			rs = st.executeQuery("SELECT TO_CHAR(fecha, 'DD-MM-YY HH24:MI:SS')||'-'||nif||'-'||idtipo FROM INCIDENCIA ORDER BY fecha, nif, idtipo");
 
 			StringBuilder resultado = new StringBuilder();
 			while (rs.next()) {
@@ -314,22 +363,22 @@ try {
 			logger.debug("Resultado actual: " + resultado.toString());
 			String cadenaEsperada =
 			// @formatter:off
-			"11/04/19 12:00:00,000000-10000000A-2\n" +
-			"12/04/19 11:00:00,000000-10000000B-2\n" +
-			"12/04/19 12:00:00,000000-10000000C-2\n" +
-			"12/04/19 12:00:00,000000-20000000C-2\n" +
-			"12/04/19 13:00:00,000000-10000000C-3\n" +
-			"12/04/19 13:00:00,000000-20000000C-3\n" +
-			"13/04/19 14:00:00,000000-30000000A-3\n" +			
-			"13/04/19 15:00:00,000000-30000000B-2\n" +
-			"13/04/19 16:00:00,000000-30000000C-1\n" +
-			"15/05/19 16:00:00,000000-10000000A-3\n"; // nueva fila
+			"11-04-19 12:00:00-10000000A-2\n" +
+			"12-04-19 11:00:00-10000000B-2\n" +
+			"12-04-19 12:00:00-10000000C-2\n" +
+			"12-04-19 12:00:00-20000000C-2\n" +
+			"12-04-19 13:00:00-10000000C-3\n" +
+			"12-04-19 13:00:00-20000000C-3\n" +
+			"13-04-19 14:00:00-30000000A-3\n" +			
+			"13-04-19 15:00:00-30000000B-2\n" +
+			"13-04-19 16:00:00-30000000C-1\n" +
+			"15-05-19 16:00:00-10000000A-3\n"; // nueva fila
 			// @formatter:on
 	
 			if (cadenaEsperada.equals(resultado.toString())) {
-				System.out.println("\tOK incidencia bien insertada");
+				logger.info("\tOK incidencia bien insertada");
 			} else {
-				System.out.println("\tERROR incidencia mal insertada");
+				logger.info("\tERROR incidencia mal insertada");
 			}
 			rs.close();
 			rs = st.executeQuery("SELECT puntos FROM conductor WHERE NIF='10000000A'");
@@ -339,9 +388,9 @@ try {
 			}
 			String puntosEsperados = "3"; // le deberíamos descontar 3 puntos quendado 6-3 = 3 puntos.
 			if (puntosEsperados.equals(resultadoEsperadoPuntos.toString())) {
-				System.out.println("\tOK actualiza bien los puntos del conductor");
+				logger.info("\tOK actualiza bien los puntos del conductor");
 			} else {
-				System.out.println("\tERROR no descuenta bien los puntos de la incidencia del conductor");
+				logger.info("\tERROR no descuenta bien los puntos de la incidencia del conductor");
 			}
 			con.commit();
 		} catch (Exception ex) {
@@ -360,12 +409,12 @@ try {
 	 */
 	private static void insertarIncidenciaConTipoIncidenciaErroneo(Service implService) {
 		try {
-			System.out.println("Insertando nueva incidencia...");
+			logger.info("Insertando nueva incidencia...");
 			// Usamos ID 3 que corresponde a incidencia "Moderada"
 			implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "10000000A", 3);
-			System.out.println("\tIncidencia insertada correctamente");
+			logger.info("\tIncidencia insertada correctamente");
 		} catch (Exception ex) {
-			System.out.println("\tNo se pudo insertar la incidencia: " + ex.getMessage());
+			logger.info("\tNo se pudo insertar la incidencia: " + ex.getMessage());
 		}
 	}
 
@@ -375,25 +424,25 @@ try {
 	 * 
 	 * @param implService implementación del servicio
 	 */
-	private static void consultarVehiculosUsandoGrafo(Service implService) {
+	private static void consultarVehiculosUsandoGrafo(Service implService) throws PersistenceException {
 		try {
-			System.out.println("Información completa con grafos de entidades...");
+			logger.info("Información completa con grafos de entidades...");
 			List<Vehiculo> vehiculos = implService.consultarVehiculos();		
 			for (Vehiculo vehiclulo : vehiculos) {
-				System.out.println(vehiclulo.toString());
+				logger.info(vehiclulo.toString());
 				Set<Conductor> conductores = vehiclulo.getConductores();
 				for (Conductor conductor : conductores) {
-					System.out.println("\t" + conductor.toString());
+					logger.info("\t" + conductor.toString());
 					Set<Incidencia> incidencias = conductor.getIncidencias();
 					for (Incidencia incidencia : incidencias) {
-						System.out.println("\t\t" + incidencia.toString());
+						logger.info("\t\t" + incidencia.toString());
 					}
 				}
 			}
-			System.out.println("OK Sin excepciones en la consulta completa y acceso posterior");
+			logger.info("OK Sin excepciones en la consulta completa y acceso posterior");
 		} catch (PersistenceException ex) {
 			logger.error("ERROR en transacción de consultas de vehiculos con JPA: " + ex.getLocalizedMessage());
-			throw new RuntimeException("Error en consulta de vehiculos", ex);
+			throw ex;
 		}
 	}
 

@@ -19,7 +19,13 @@ public class ServiceImpl extends PersistenceService implements Service {
     private HistoricoIncidenciaDAO historicoIncidenciaDAO;
     
     public ServiceImpl() {
+        // Crear un nuevo EntityManager
+        if (this.entityManager != null && this.entityManager.isOpen()) {
+            this.entityManager.close();
+        }
         this.entityManager = createSession();
+        
+        // Inicializar los DAOs
         vehiculoDAO = new VehiculoDAO();
         vehiculoDAO.setEntityManager(entityManager);
         conductorDAO = new ConductorDAO();
@@ -37,7 +43,9 @@ public class ServiceImpl extends PersistenceService implements Service {
     }
 
     protected void begin() {
-        beginTransaction(entityManager);
+        if (entityManager != null && !entityManager.getTransaction().isActive()) {
+            beginTransaction(entityManager);
+        }
     }
 
     protected void commit() {
@@ -51,6 +59,15 @@ public class ServiceImpl extends PersistenceService implements Service {
     @Override
     public void insertarIncidencia(Date fecha, String nif, long tipo) throws PersistenceException {
         try {
+            // Asegurarnos de que tenemos un EntityManager válido
+            if (entityManager == null || !entityManager.isOpen()) {
+                this.entityManager = createSession();
+                // Actualizar los EntityManagers en los DAOs
+                conductorDAO.setEntityManager(entityManager);
+                tipoIncidenciaDAO.setEntityManager(entityManager);
+                incidenciaDAO.setEntityManager(entityManager);
+            }
+            
             begin();
             
             Conductor conductor = conductorDAO.findByNif(nif);
@@ -79,7 +96,9 @@ public class ServiceImpl extends PersistenceService implements Service {
             
             commit();
         } catch (Exception e) {
-            rollback();
+            if (entityManager != null && entityManager.getTransaction().isActive()) {
+                rollback();
+            }
             throw new PersistenceException(e.getMessage());
         }
     }

@@ -7,20 +7,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/user_lib_jpa"/>
-	<classpathentry kind="lib" path="/home/alumno/Descargas/proyecto_user_library/lib/fscontext-4.6-b01.jar"/>
-	<classpathentry kind="lib" path="/home/alumno/Descargas/proyecto_user_library/lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="/home/alumno/Descargas/proyecto_user_library/lib/ojdbc6.jar"/>
-	<classpathentry kind="lib" path="/home/alumno/Descargas/proyecto_user_library/lib/slf4j-api-1.7.30.jar"/>
-	<classpathentry kind="lib" path="/home/alumno/Descargas/proyecto_user_library/lib/ucp.jar"/>
-	<classpathentry kind="lib" path="/home/alumno/Escritorio/log4j-api-2.13.1.jar"/>
-	<classpathentry kind="lib" path="/home/alumno/Escritorio/byte-buddy-1.12.8 (1).jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/SLF4J"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Oracle"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Hibernate">
-		<attributes>
-			<attribute name="owner.project.facets" value="jpt.jpa;#system#"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/FileSystemContext"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
