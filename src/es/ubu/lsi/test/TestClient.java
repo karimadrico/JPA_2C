@@ -4,12 +4,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.sql.DataSource;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Set;
-
-import javax.persistence.PersistenceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +52,7 @@ public class TestClient {
 	 * 
 	 * @param args arguments.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws PersistenceException {
 		try {
 			logger.info("Iniciando aplicación...");
 			logger.info("Probando el servicio...");
@@ -110,7 +107,7 @@ public class TestClient {
 	/**
 	 * Test service using JDBC and JPA.
 	 */
-	static void testService() throws Exception {
+	static void testService() throws PersistenceException {
 		try {
 			logger.info("Creando tablas...");
 			createTables(); // Primero creamos las tablas
@@ -152,7 +149,7 @@ public class TestClient {
 
 			} catch (Exception e) {
 				logger.error("Error en la ejecución del servicio: " + e.getMessage());
-				throw e;
+				throw new RuntimeException(e);
 			}
 		} finally {
 			if (pool != null) {
