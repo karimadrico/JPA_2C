@@ -53,6 +53,6 @@ public class DireccionPostal implements Serializable {
 
     @Override
     public String toString() {
-        return "DireccionPostal [direccion=" + direccion + ", codigoPostal=" + codigoPostal + ", ciudad=" + ciudad + "]";
+        return "DireccionPostal [direccion=" + direccion + ", cp=" + codigoPostal + ", ciudad=" + ciudad + "]";
     }
 } 

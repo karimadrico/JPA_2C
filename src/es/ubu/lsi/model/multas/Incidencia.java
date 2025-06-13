@@ -61,6 +61,10 @@ public class Incidencia {
 
     @Override
     public String toString() {
-        return "Incidencia [id=" + id + ", anotacion=" + anotacion + "]";
+        return "Incidencia [id=" + id
+            + ", anotacion=" + anotacion
+            + ", conductor=" + (conductor != null ? conductor.toString() : "null")
+            + ", tipoIncidencia=" + (tipoIncidencia != null ? tipoIncidencia.toString() : "null")
+            + "]";
     }
 } 

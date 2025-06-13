@@ -124,7 +124,7 @@ public class Conductor {
 
     @Override
     public String toString() {
-        return "Conductor [nif=" + nif + ", nombre=" + nombre + ", apellido=" + apellido + 
+        return "Conductor [nif=" + nif + ", nombre=" + nombre + ", apellido=" + apellido +
                ", direccionPostal=" + direccionPostal + ", puntos=" + puntos + "]";
     }
 } 

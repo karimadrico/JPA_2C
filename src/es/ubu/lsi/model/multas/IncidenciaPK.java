@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import java.text.SimpleDateFormat;
 
 @Embeddable
 public class IncidenciaPK implements Serializable {
@@ -75,6 +76,8 @@ public class IncidenciaPK implements Serializable {
 
     @Override
     public String toString() {
-        return "IncidenciaPK [fecha=" + fecha + ", nif=" + nif + "]";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        String fechaStr = fecha != null ? sdf.format(fecha) : "null";
+        return "IncidenciaPK [fecha=" + fechaStr + ", nif=" + nif + "]";
     }
 } 
