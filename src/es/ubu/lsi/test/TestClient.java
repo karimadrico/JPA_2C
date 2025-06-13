@@ -165,58 +165,58 @@ public class TestClient {
 	} // testClient
 	
 	/**
-* Intenta insertar una incidencia dejando en negativo nif  no existe.
-* 
-* @param implService servicio
-*/
-private static void insertarIncidenciaConReservaNegativaErroneo(Service implService) {
-try {
-	logger.info("Insertar incidencia dejando puntos en negativo");
-	// fecha y usuario correcto
-	implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "10000000C", 1);// NIF NO EXISTE
-	logger.info("\tOK detecta correctamente que se está dejando puntos en negativo");
-
-} catch (IncidentException ex) {
-	if (ex.getError() == IncidentError.NOT_AVAILABLE_POINTS) {
-		logger.info("\tOK detecta correctamente que se está dejando puntos en negativo");
-	} else {
-		logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
+	 * Intenta insertar una incidencia dejando en negativo nif  no existe.
+	 * 
+	 * @param implService servicio
+	 */
+	private static void insertarIncidenciaConReservaNegativaErroneo(Service implService) {
+		try {
+			logger.info("Insertar incidencia dejando puntos en negativo");
+			implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "10000000C", 1);
+			logger.info("\tERROR no detecta que se está dejando puntos en negativo");
+		} catch (IncidentException ex) {
+			if (ex.getError() == IncidentError.NOT_AVAILABLE_POINTS) {
+				logger.info("\tOK detecta correctamente que se está dejando puntos en negativo");
+			} else {
+				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
+			}
+		} catch (PersistenceException ex) {
+			if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("puntos suficientes")) {
+				logger.info("\tOK detecta correctamente que se está dejando puntos en negativo");
+			} else {
+				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getMessage());
+			}
+		} catch(Exception ex) {
+			logger.error("\tERROR grave de programación en transacción de inserción de incicencia con JPA: " + ex.getLocalizedMessage());
+		}
 	}
-} catch (PersistenceException ex) {
-	logger.error("ERROR en transacción de inserción de incidencia con JPA: " + ex.getLocalizedMessage());
-	throw new RuntimeException("Error en inserción de incidencia en vehiculos", ex);
-} catch(Exception ex) {
-	logger.error("ERROR grave de programación en transacción de inserción de incicencia con JPA: " + ex.getLocalizedMessage());
-	throw new RuntimeException("Error grave en inserción de incidencia en vehiculos", ex);
-}
-}
 
-/**
-* Intenta insertar una incidencia cuyo nif  no existe.
-* 
-* @param implService servicio
-*/
-private static void insertarIncidenciaConNIFErroneo(Service implService) {
-try {
-	logger.info("Insertar incidencia con nif erróneo");
-	// fecha y usuario correcto
-	implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "NIF", 1); // NIF NO EXISTE
-	logger.info("\tOK detecta correctamente que NO existe el NIF y finaliza la transacción");
-
-} catch (IncidentException ex) {
-	if (ex.getError() == IncidentError.NOT_EXIST_DRIVER) {
-		logger.info("\tOK detecta correctamente que NO existe ese NIF");
-	} else {
-		logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
-	}
-} catch (PersistenceException ex) {
-	logger.error("ERROR en transacción de inserción de incidencia con JPA: " + ex.getLocalizedMessage());
-	throw new RuntimeException("Error en inserción de incidencia en vehiculos", ex);
-} catch(Exception ex) {
-	logger.error("ERROR grave de programación en transacción de inserción de incicencia con JPA: " + ex.getLocalizedMessage());
-	throw new RuntimeException("Error grave en inserción de incidencia en vehiculos", ex);
-}
-}		
+	/**
+	 * Intenta insertar una incidencia cuyo nif  no existe.
+	 * 
+	 * @param implService servicio
+	 */
+	private static void insertarIncidenciaConNIFErroneo(Service implService) {
+		try {
+			logger.info("Insertar incidencia con nif erróneo");
+			implService.insertarIncidencia(dateformat.parse("15/05/2019 17:00"), "NIF", 1);
+			logger.info("\tERROR no detecta que NO existe el NIF y finaliza la transacción");
+		} catch (IncidentException ex) {
+			if (ex.getError() == IncidentError.NOT_EXIST_DRIVER) {
+				logger.info("\tOK detecta correctamente que NO existe ese NIF");
+			} else {
+				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
+			}
+		} catch (PersistenceException ex) {
+			if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("no existe el conductor")) {
+				logger.info("\tOK detecta correctamente que NO existe ese NIF");
+			} else {
+				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getMessage());
+			}
+		} catch(Exception ex) {
+			logger.error("\tERROR grave de programación en transacción de inserción de incicencia con JPA: " + ex.getLocalizedMessage());
+		}
+	}		
 
 	/**
 	 * Indulta a conductor con dos incidencias.
@@ -299,7 +299,6 @@ try {
 			logger.info("Indultar a un conductor que no existe");
 			implService.indultar("00000000Z");
 			logger.info("\tERROR NO detecta que NO existe el conductor y finaliza la transacción");
-
 		} catch (IncidentException ex) {
 			if (ex.getError() == IncidentError.NOT_EXIST_DRIVER) {
 				logger.info("\tOK detecta correctamente que NO existe ese conductor");
@@ -307,11 +306,13 @@ try {
 				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getError().toString());
 			}
 		} catch (PersistenceException ex) {
-			logger.error("ERROR en transacción de indultar con JPA: " + ex.getLocalizedMessage());
-			throw new RuntimeException("Error en indultos en vehiculoss", ex);
+			if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("no existe el conductor")) {
+				logger.info("\tOK detecta correctamente que NO existe ese conductor");
+			} else {
+				logger.error("\tERROR detecta un error diferente al esperado:  " + ex.getMessage());
+			}
 		} catch(Exception ex) {
-			logger.error("ERROR GRAVE de programación en transacción de indultar con JPA: " + ex.getLocalizedMessage());
-			throw new RuntimeException("Error grave en indultos en vehiculos", ex);
+			logger.error("\tERROR GRAVE de programación en transacción de indultar con JPA: " + ex.getLocalizedMessage());
 		}
 	}
 

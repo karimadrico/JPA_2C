@@ -1,5 +1,5 @@
 #This file is used by the JNDI FSContext.
-#Fri Jun 13 17:08:27 CEST 2025
+#Fri Jun 13 17:20:30 CEST 2025
 testdb_pooled/RefAddr/4/Content=3
 UCP_pool/RefAddr/13/Encoding=String
 testdb_pooled/RefAddr/8/Content=0
@@ -36,8 +36,8 @@ testdb_pooled/RefAddr/11/Type=propertyCycle
 UCP_pool/RefAddr/4/Type=connectionFactoryClassName
 testdb_pooled/RefAddr/17/Type=connectionHarvestMaxCount
 testdb_pooled/RefAddr/13/Encoding=String
-testdb_pooled/RefAddr/9/Content=0
 testdb_pooled/RefAddr/10/Encoding=String
+testdb_pooled/RefAddr/9/Content=0
 testdb_pooled/RefAddr/0/Encoding=String
 UCP_pool/RefAddr/12/Encoding=String
 UCP_pool/RefAddr/8/Content=0
@@ -47,8 +47,8 @@ UCP_pool/RefAddr/18/Type=connectionHarvestTriggerCount
 UCP_pool/RefAddr/12/Content=30
 testdb_pooled/RefAddr/7/Type=timeToLiveConnectionTimeout
 UCP_pool/RefAddr/3/Encoding=String
-testdb_pooled/RefAddr/15/Encoding=String
 testdb_pooled/RefAddr/15/Content=0
+testdb_pooled/RefAddr/15/Encoding=String
 testdb_pooled/RefAddr/8/Encoding=String
 UCP_pool/RefAddr/19/Content=1
 testdb_pooled/RefAddr/1/Type=portNumber
